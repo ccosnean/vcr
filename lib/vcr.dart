@@ -109,12 +109,18 @@ class VcrAdapter extends IOHttpClientAdapter {
     String host = options.uri.host;
     String path = options.uri.path;
     String method = options.method;
+    Object? data = options.data;
+
     List requests = _readFile()!;
     return requests.firstWhere((request) {
       Uri uri2 = Uri.parse(request["request"]["url"]);
-      return uri2.host == host &&
-          uri2.path == path &&
-          request["request"]["method"] == method;
+      final matchesUri = uri2.host == host && uri2.path == path;
+      final matchesMethod = request["request"]["method"] == method;
+      final matchesBody = data == null
+          ? true
+          : data.toString() == request['request']['payload'].toString();
+
+      return matchesUri && matchesMethod && matchesBody;
     }, orElse: () => null);
   }
 }
